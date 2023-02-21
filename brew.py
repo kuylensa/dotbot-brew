@@ -94,8 +94,17 @@ class Brew(dotbot.Plugin):
 
     def _bootstrap_brew(self):
         link = "https://raw.githubusercontent.com/Homebrew/install/master/install.sh"
-        cmd = """hash brew || /bin/bash -c "$(curl -fsSL {0})";
-              brew update""".format(link)
+        arch_name = platform.uname().machine
+        if arch_name == "x86_86":
+            path = "/usr/local/bin/brew"
+        elif arch_name == "arm64":
+            path = "/opt/homebrew/bin/brew"
+        else:
+            return False
+
+        cmd = """hash brew || /bin/bash -c "$(curl -fsSL {brew_url})";
+              eval "$({brew_path} shellenv)";
+              brew update""".format(brew_url=link, brew_path=path)
         self._bootstrap(cmd)
 
     def _bootstrap_cask(self):
